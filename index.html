@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="填寫睡眠問卷、計算七個構面及總分，並下載 Excel。">
+  <title>PSQI 睡眠品質計算機</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="eyebrow">PSQI · SLEEP QUALITY</div>
+      <h1>睡眠品質計算機</h1>
+      <div class="hero-stats"><span>9 組題目</span><span>7 個構面</span><span>總分 0–21</span></div>
+    </header>
+
+    <main>
+    <div class="layout">
+      <form id="psqi-form" class="card" autocomplete="off">
+        <section class="section">
+          <div class="section-title"><span class="section-number">01</span><div><h2>日期與患者編號</h2><p>Date 預設為今天日期；患者(ID)欄位若有需要可自行填入。</p></div></div>
+          <div class="identity-grid">
+            <label class="field">Date <input name="date" type="date" required></label>
+            <label class="field">患者編號（選填）<input name="patientId" type="text" maxlength="100" aria-label="患者編號"></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">02</span><div><h2>睡眠時間</h2><p>點選時間清單或直接輸入；使用 24 小時制，例如下午 1 點為 13:00。</p></div></div>
+          <div class="field-grid">
+            <div class="field time-field"><span>1. 通常何時上床？</span><div class="time-pair"><div class="time-combo" id="bed-hour-combo"><input name="bedHour" type="text" inputmode="numeric" pattern="(?:[01]?[0-9]|2[0-3])" maxlength="2" value="23" aria-label="上床時間，小時" title="請輸入 00 至 23" required><button class="time-toggle" type="button" aria-label="選擇上床小時" aria-controls="bed-hour-options" aria-haspopup="listbox" aria-expanded="false">⌄</button><div class="time-menu" id="bed-hour-options" role="listbox" hidden></div></div><span class="time-colon">:</span><div class="time-combo" id="bed-minute-combo"><input name="bedMinute" type="text" inputmode="numeric" pattern="[0-5]?[0-9]" maxlength="2" value="00" aria-label="上床時間，分鐘" title="請輸入 00 至 59" required><button class="time-toggle" type="button" aria-label="選擇上床分鐘" aria-controls="bed-minute-options" aria-haspopup="listbox" aria-expanded="false">⌄</button><div class="time-menu" id="bed-minute-options" role="listbox" hidden></div></div></div></div>
+            <label class="field">2. 通常多久才能入睡？（分鐘）<input name="latency" type="number" min="0" max="1440" step="1" placeholder="例如：20" required></label>
+            <div class="field time-field"><span>3. 早上通常何時起床？</span><div class="time-pair"><div class="time-combo" id="wake-hour-combo"><input name="wakeHour" type="text" inputmode="numeric" pattern="(?:[01]?[0-9]|2[0-3])" maxlength="2" value="07" aria-label="起床時間，小時" title="請輸入 00 至 23" required><button class="time-toggle" type="button" aria-label="選擇起床小時" aria-controls="wake-hour-options" aria-haspopup="listbox" aria-expanded="false">⌄</button><div class="time-menu" id="wake-hour-options" role="listbox" hidden></div></div><span class="time-colon">:</span><div class="time-combo" id="wake-minute-combo"><input name="wakeMinute" type="text" inputmode="numeric" pattern="[0-5]?[0-9]" maxlength="2" value="00" aria-label="起床時間，分鐘" title="請輸入 00 至 59" required><button class="time-toggle" type="button" aria-label="選擇起床分鐘" aria-controls="wake-minute-options" aria-haspopup="listbox" aria-expanded="false">⌄</button><div class="time-menu" id="wake-minute-options" role="listbox" hidden></div></div></div></div>
+            <label class="field">4. 每晚實際睡眠時數（小時）<input name="duration" type="number" min="0.01" max="24" step="any" placeholder="例如：6.5" required></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">03</span><div><h2>睡眠困擾</h2><p>過去一個月，每星期大約發生幾次？5j 可留白。</p></div></div>
+          <div id="q5-list"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">04</span><div><h2>整體情況</h2><p>請選擇最符合您情況的答案。</p></div></div>
+          <div id="final-questions"></div>
+        </section>
+
+        <div class="actions">
+          <button class="button primary" type="submit">計算分數</button>
+          <button class="button danger" type="button" id="clear-records-btn" disabled>清除全部紀錄</button>
+          <button class="button secondary" type="button" id="save-btn">儲存患者紀錄</button>
+          <button class="button primary" type="button" id="export-btn" disabled>匯出 Excel</button>
+        </div>
+        <style>
+            .save-hint {
+              color: red;
+            }
+          </style>
+        <p class="save-hint">★.注意!分數送出後，請先「儲存」，才能匯出Excel檔案。</p>
+        <p id="save-feedback" class="save-feedback" role="status" aria-live="polite"></p>
+      </form>
+
+      <aside class="card result-card" aria-live="polite">
+        <div class="result-heading"><span class="badge">計算結果</span><span>PSQI</span></div>
+        <div class="total"><strong id="total">—</strong><span>/ 21 分</span></div>
+        <p id="verdict" class="verdict">填完題目後，按「計算分數」。</p>
+        <div class="rule">總分高於 5 分，表示睡眠品質不佳。</div>
+        <section id="pie-section" class="pie-section" hidden>
+          <h2 class="chart-title">七個構面分數占比</h2>
+          <div class="pie-layout">
+            <svg id="component-pie" class="component-pie" viewBox="0 0 200 200" role="img" aria-label="七個構面分數占比"><circle cx="100" cy="100" r="88" fill="#e5ecef"/></svg>
+            <div id="pie-legend" class="pie-legend"></div>
+          </div>
+        </section>
+        <h2>七個構面</h2>
+        <div id="components" class="components"></div>
+        <div class="efficiency-result"><span>睡眠效率</span><strong id="sleep-efficiency">—</strong></div>
+        <p id="warning" class="warning" hidden></p>
+      </aside>
+    </div>
+
+      <section class="card records-card" aria-labelledby="records-title">
+        <div class="records-head">
+          <div><h2 id="records-title">已儲存紀錄：<span id="record-count">0</span> 筆</h2><p>紀錄保存在目前瀏覽器，重新整理後仍可繼續填答；其他裝置不會同步。</p></div>
+        </div>
+        <p id="record-status" class="record-status" role="status" aria-live="polite"></p>
+        <div id="record-list" class="record-list"></div>
+      </section>
+    </main>
+
+    <footer>中國醫藥大學北港附設醫院 穿戴式科技與高齡醫學實驗室</footer>
+  </div>
+</body>
+</html>
