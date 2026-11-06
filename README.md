@@ -2,21 +2,6 @@
 
 這是一個可放在 GitHub Pages（`github.io`）的靜態網站。首頁填寫個人資料表，再進入 PSQI 與 HAMD。三份表單各自儲存在目前瀏覽器中，可依患者編號與填寫次數回看；HAMD 頁面可將個人資料 PDF 與 PSQI／HAMD 兩工作表 Excel 一次打包下載。
 
-## 上傳至 Google 雲端
-
-上傳目標已設為[指定資料夾](https://drive.google.com/drive/folders/1MqTEApqHK3GuREt0esYdwRLWnKr6B9db)。個人資料頁可上傳每筆 PDF；PSQI 與 HAMD 頁可上傳每筆 PDF 和 Excel；HAMD 頁的「上傳全部」會上傳所有已儲存的個人資料 PDF，以及一份含 PSQI、HAMD 兩工作表的 Excel。上傳不會取代原本的下載功能。
-未設定 OAuth 用戶端 ID 時，Google 上傳按鈕會隱藏，網頁仍可使用 NAS 資料包流程。
-
-首次啟用需要由有權限管理 Google Cloud 的人完成：
-
-1. 在 Google Cloud 建立專案並啟用 **Google Drive API**。
-2. 進入 **Google Auth platform → Branding／Audience／Data Access**，填寫應用程式資訊；Data Access 加入 `https://www.googleapis.com/auth/drive`。若採 External／Testing，於 Audience 加入實際測試者的 Google 帳號；若院方使用同一 Google Workspace 組織，可由管理員評估 Internal。
-3. 進入 **Google Auth platform → Clients → Create client**，類型選 **Web application**。在「Authorized JavaScript origins」填入 `https://cmubh.github.io`，不要附加 `/PSQImath/`。目前使用彈出式授權，不需填重新導向網址。若用本機伺服器測試，再加入對應的 `http://localhost:埠號`；直接以 `file://` 開啟網頁無法使用 Google 登入。
-4. 用戶端 ID 已填入 [`drive-config.js`](drive-config.js) 的 `clientId`；若日後更換 Google Cloud 專案，再修改此值。請一併發布所有網頁檔案。**不要**將用戶端密鑰、服務帳戶金鑰或存取權杖寫入 GitHub Pages。
-5. 為實際操作人員的 Google 帳號授予目標資料夾的**編輯權限**。按「上傳雲端」時，操作人員需登入並同意 Google Drive 權限；僅有資料夾連結不代表有寫入權限。
-
-由於目標是既有固定資料夾，網頁目前請求 Google Drive 的 `drive` 權限。這是 Google 列為**受限制**的 OAuth 權限，對外發布時可能需要 OAuth 驗證；建議由院方資訊人員設定及管理。Google 登入權杖只暫存在當次網頁操作中，程式不將它存入瀏覽器紀錄。批次上傳若中途失敗，已成功上傳的檔案不會自動刪除，重試前請先檢查資料夾，避免重複檔案。
-
 ## 檔案
 
 | 檔案 | 用途 |

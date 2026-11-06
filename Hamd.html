@@ -8,9 +8,6 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="hamd.css">
   <script src="xlsx.js" defer></script>
-  <script src="https://accounts.google.com/gsi/client" defer></script>
-  <script src="drive-config.js" defer></script>
-  <script src="drive-upload.js" defer></script>
   <script src="vendor/pdf-lib.min.js" defer></script>
   <script src="intake-form-template.js" defer></script>
   <script src="intake-form.js" defer></script>
@@ -75,7 +72,6 @@
         <div><h2 id="hamd-records-title">已儲存 HAMD 紀錄：<span id="hamd-record-count">0</span> 筆</h2><p>點擊藍色患者編號可回看與更新。右側按鈕會匯出個人資料 PDF，以及含 PSQI、HAMD 兩個工作表的 Excel。</p></div>
         <div class="hamd-record-tools">
           <button class="button combined-export" type="button" id="combined-export-btn">匯出當前紀錄壓縮檔</button>
-          <button class="button drive-action" type="button" id="combined-drive-btn">上傳全部至 Google 雲端</button>
           <button class="button danger" type="button" id="hamd-clear-records-btn" disabled>清除全部紀錄</button>
         </div>
       </div>

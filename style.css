@@ -146,12 +146,6 @@ input[type=number]{width:100%}
 .record-pdf:disabled{opacity:.5;cursor:wait}
 .record-excel{border:1px solid #acd0d0;border-radius:8px;background:#eff8f8;color:#116b72;padding:6px 10px;font-size:.8rem;font-weight:700}
 .record-excel:hover{background:#dbf0f0}
-.record-drive,.drive-action{border:1px solid #9cc1ae;border-radius:8px;background:#e8f4e9;color:#225b38;font-weight:700}
-.record-drive{padding:6px 10px;font-size:.8rem}
-.record-drive:hover:not(:disabled),.drive-action:hover:not(:disabled){background:#d8eddb}
-.record-drive:disabled,.drive-action:disabled{opacity:.5;cursor:wait}
-.record-drive,.drive-action{display:none}
-body.drive-ready .record-drive,body.drive-ready .drive-action{display:inline-flex;align-items:center;justify-content:center}
 footer{text-align:center;color:#667b86;font-size:.83rem;padding:32px 0 38px}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.page{padding:14px 14px 0}.hero{padding:30px}.result-card{position:static;order:2}}
 @media(max-width:560px){form.card{padding:2px 18px 20px}.section{padding:23px 0}.identity-grid,.field-grid{grid-template-columns:1fr;gap:18px}.choices{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{border-radius:18px;padding:27px 22px}.actions .button{padding:10px 7px;font-size:.9rem}}

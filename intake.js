@@ -83,10 +83,9 @@ function intakeRender() {
   document.querySelector("#intake-record-count").textContent = intakeRecords.length;
   document.querySelector("#intake-clear-btn").disabled = intakeRecords.length === 0;
   document.querySelector("#intake-pdf-btn").disabled = !activeIntakeRecord;
-  document.querySelector("#intake-drive-btn").disabled = !activeIntakeRecord;
   document.querySelector("#intake-save-btn").textContent = activeIntakeRecord ? "更新此患者紀錄" : "儲存患者紀錄";
   document.querySelector("#intake-record-list").innerHTML = intakeRecords.length
-    ? `<ol class="record-items">${intakeRecords.map((item, index) => `<li class="record-item"><div class="record-main"><div class="record-summary"><strong>第 ${index + 1} 筆</strong><span>${intakeEscape(item.date)}</span><button class="record-patient" type="button" data-restore-index="${index}" aria-label="回看患者 ${intakeEscape(item.patientId || item.fields.name)} 的個人資料">${intakeEscape(item.patientId || item.fields.name)}</button>${item.visitNumber ? `<span>第 ${intakeEscape(item.visitNumber)} 次</span>` : ""}</div><div class="record-controls"><button class="record-pdf" type="button" data-pdf-index="${index}">輸出 PDF</button><button class="record-drive" type="button" data-drive-index="${index}" aria-label="上傳第 ${index + 1} 筆個人資料 PDF 至 Google 雲端">上傳雲端</button><button class="record-delete" type="button" data-delete-index="${index}">刪除</button></div></div></li>`).join("")}</ol>`
+    ? `<ol class="record-items">${intakeRecords.map((item, index) => `<li class="record-item"><div class="record-main"><div class="record-summary"><strong>第 ${index + 1} 筆</strong><span>${intakeEscape(item.date)}</span><button class="record-patient" type="button" data-restore-index="${index}" aria-label="回看患者 ${intakeEscape(item.patientId || item.fields.name)} 的個人資料">${intakeEscape(item.patientId || item.fields.name)}</button>${item.visitNumber ? `<span>第 ${intakeEscape(item.visitNumber)} 次</span>` : ""}</div><div class="record-controls"><button class="record-pdf" type="button" data-pdf-index="${index}">輸出 PDF</button><button class="record-delete" type="button" data-delete-index="${index}">刪除</button></div></div></li>`).join("")}</ol>`
     : `<p class="record-empty">尚未儲存個人資料。</p>`;
 }
 function intakeRestore(item) {
@@ -155,39 +154,14 @@ async function intakeDownloadPdf(item, button) {
     if (button) button.disabled = false;
   }
 }
-async function intakeUploadPdf(item, button) {
-  if (!item || button.disabled) return;
-  button.disabled = true;
-  const feedback = document.querySelector("#intake-record-status");
-  feedback.textContent = "正在連接 Google 雲端…";
-  try {
-    await PsqiDrive.uploadFiles(async () => {
-      const bytes = await IntakeForm.makePdf(item);
-      const id = String(item.patientId || item.fields.name).replace(/[<>:"/\\|?*]/g, "_").slice(0, 50);
-      const visit = item.visitNumber ? `_Time${item.visitNumber}` : "";
-      return [{blob: new Blob([bytes], {type: "application/pdf"}), name: `個人資料表_${item.date}_${id}${visit}.pdf`}];
-    }, () => { feedback.textContent = "正在上傳個人資料 PDF…"; });
-    feedback.textContent = "個人資料 PDF 已上傳至指定的 Google 雲端資料夾。";
-  } catch (error) {
-    feedback.textContent = error.message;
-    console.error("Intake Drive upload failed", error);
-  } finally {
-    button.disabled = false;
-  }
-}
 document.querySelector("#intake-pdf-btn").addEventListener("click", event => {
   if (activeIntakeRecord) intakeDownloadPdf(activeIntakeRecord, event.currentTarget);
-});
-document.querySelector("#intake-drive-btn").addEventListener("click", event => {
-  if (activeIntakeRecord) intakeUploadPdf(activeIntakeRecord, event.currentTarget);
 });
 document.querySelector("#intake-record-list").addEventListener("click", event => {
   const restore = event.target.closest("[data-restore-index]");
   if (restore) { intakeRestore(intakeRecords[Number(restore.dataset.restoreIndex)]); return; }
   const pdf = event.target.closest("[data-pdf-index]");
   if (pdf) { intakeDownloadPdf(intakeRecords[Number(pdf.dataset.pdfIndex)], pdf); return; }
-  const drive = event.target.closest("[data-drive-index]");
-  if (drive) { intakeUploadPdf(intakeRecords[Number(drive.dataset.driveIndex)], drive); return; }
   const remove = event.target.closest("[data-delete-index]");
   if (!remove) return;
   const index = Number(remove.dataset.deleteIndex);

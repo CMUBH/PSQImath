@@ -458,7 +458,7 @@ function renderRecords() {
   document.querySelector("#pdf-btn").disabled = records.length === 0;
   document.querySelector("#clear-records-btn").disabled = records.length === 0;
   document.querySelector("#record-list").innerHTML = records.length
-    ? `<ol class="record-items">${records.map((item, index) => `<li class="record-item"><div class="record-main"><div class="record-summary"><strong>第 ${index + 1} 筆</strong><span>${item.row[0]}</span><button class="record-patient" type="button" data-restore-index="${index}" aria-label="將患者 ${escapeHtml(item.row[1] || "未填編號")} 的填答帶回上方問卷">患者編號 ${escapeHtml(item.row[1] || "未填")}</button>${item.row[2] ? `<span>Time ${item.row[2]}</span>` : ""}<span>PSQI ${item.total} 分</span></div><div class="record-controls"><button class="record-pdf" type="button" data-pdf-index="${index}" aria-label="輸出第 ${index + 1} 筆 PSQI 表單">輸出表單</button><button class="record-excel" type="button" data-excel-index="${index}" aria-label="輸出第 ${index + 1} 筆 PSQI Excel">輸出 Excel</button><button class="record-drive" type="button" data-drive-index="${index}" aria-label="上傳第 ${index + 1} 筆 PSQI PDF 與 Excel 至 Google 雲端">上傳雲端</button><button class="record-delete" type="button" data-delete-index="${index}" aria-label="刪除第 ${index + 1} 筆紀錄">刪除</button></div></div></li>`).join("")}</ol>`
+    ? `<ol class="record-items">${records.map((item, index) => `<li class="record-item"><div class="record-main"><div class="record-summary"><strong>第 ${index + 1} 筆</strong><span>${item.row[0]}</span><button class="record-patient" type="button" data-restore-index="${index}" aria-label="將患者 ${escapeHtml(item.row[1] || "未填編號")} 的填答帶回上方問卷">患者編號 ${escapeHtml(item.row[1] || "未填")}</button>${item.row[2] ? `<span>Time ${item.row[2]}</span>` : ""}<span>PSQI ${item.total} 分</span></div><div class="record-controls"><button class="record-pdf" type="button" data-pdf-index="${index}" aria-label="輸出第 ${index + 1} 筆 PSQI 表單">輸出表單</button><button class="record-excel" type="button" data-excel-index="${index}" aria-label="輸出第 ${index + 1} 筆 PSQI Excel">輸出 Excel</button><button class="record-delete" type="button" data-delete-index="${index}" aria-label="刪除第 ${index + 1} 筆紀錄">刪除</button></div></div></li>`).join("")}</ol>`
     : `<p class="record-empty">尚未儲存填答。完成第一位後，按「儲存當前分數」。</p>`;
 }
 renderRecords();
@@ -629,33 +629,6 @@ document.querySelector("#record-list").addEventListener("click", async event => 
   } catch (error) {
     feedback.textContent = "無法輸出表單，請重新整理頁面後再試。";
     console.error("PSQI PDF export failed", error);
-  } finally {
-    button.disabled = false;
-  }
-});
-document.querySelector("#record-list").addEventListener("click", async event => {
-  const button = event.target.closest("[data-drive-index]");
-  if (!button || button.disabled) return;
-  const index = Number(button.dataset.driveIndex);
-  if (!Number.isInteger(index) || index < 0 || index >= records.length) return;
-  const item = records[index];
-  const row = item.row;
-  const date = String(row[0]).replaceAll("/", "-");
-  const id = String(row[1] ?? "").trim().replace(/[<>:"/\\|?*]/g, "_").slice(0, 50);
-  const visit = String(row[2] ?? "");
-  const suffix = `${id ? `_${id}` : ""}${/^[1-5]$/.test(visit) ? `_Time${visit}` : ""}`;
-  const feedback = document.querySelector("#record-status");
-  button.disabled = true;
-  feedback.textContent = "正在連接 Google 雲端…";
-  try {
-    await PsqiDrive.uploadFiles(async () => [
-      {blob: PsqiWorkbook.makeXlsx([{name: "PSQI", rows: [headers, psqiExcelRow(item)], percentColumn: 33}]), name: `PSQI_${date}${suffix}.xlsx`},
-      {blob: new Blob([await PsqiForm.makePdf(savedFormData(item))], {type: "application/pdf"}), name: `PSQI_表單_${date}${suffix}.pdf`}
-    ], (current, total) => { feedback.textContent = `正在上傳第 ${current}／${total} 個檔案…`; });
-    feedback.textContent = "此筆 PSQI 的 Excel 與 PDF 已上傳至指定的 Google 雲端資料夾。";
-  } catch (error) {
-    feedback.textContent = error.message;
-    console.error("PSQI Drive upload failed", error);
   } finally {
     button.disabled = false;
   }

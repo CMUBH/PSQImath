@@ -342,9 +342,8 @@ function renderRecords() {
   document.querySelector("#hamd-pdf-btn").disabled = records.length === 0;
   document.querySelector("#hamd-clear-records-btn").disabled = records.length === 0;
   document.querySelector("#combined-export-btn").disabled = records.length === 0 && readPsqiRows().length === 0 && readIntakeRecords().length === 0;
-  document.querySelector("#combined-drive-btn").disabled = records.length === 0 && readPsqiRows().length === 0 && readIntakeRecords().length === 0;
   document.querySelector("#hamd-record-list").innerHTML = records.length
-    ? `<ol class="record-items">${records.map((item, index) => `<li class="record-item"><div class="record-main"><div class="record-summary"><strong>第 ${index + 1} 筆</strong><span>${item.row[0]}</span><button class="record-patient" type="button" data-restore-index="${index}" aria-label="將患者 ${escapeHtml(item.row[1] || "未填編號")} 的 HAMD 填答帶回上方量表">患者編號 ${escapeHtml(item.row[1] || "未填")}</button>${item.row[2] ? `<span>Time ${item.row[2]}</span>` : ""}<span>HAMD ${item.total} 分</span></div><div class="record-controls"><button class="record-pdf" type="button" data-pdf-index="${index}" aria-label="輸出第 ${index + 1} 筆 HAMD 表單">輸出表單</button><button class="record-excel" type="button" data-excel-index="${index}" aria-label="輸出第 ${index + 1} 筆 HAMD Excel">輸出 Excel</button><button class="record-drive" type="button" data-drive-index="${index}" aria-label="上傳第 ${index + 1} 筆 HAMD PDF 與 Excel 至 Google 雲端">上傳雲端</button><button class="record-delete" type="button" data-delete-index="${index}" aria-label="刪除第 ${index + 1} 筆 HAMD 紀錄">刪除</button></div></div></li>`).join("")}</ol>`
+    ? `<ol class="record-items">${records.map((item, index) => `<li class="record-item"><div class="record-main"><div class="record-summary"><strong>第 ${index + 1} 筆</strong><span>${item.row[0]}</span><button class="record-patient" type="button" data-restore-index="${index}" aria-label="將患者 ${escapeHtml(item.row[1] || "未填編號")} 的 HAMD 填答帶回上方量表">患者編號 ${escapeHtml(item.row[1] || "未填")}</button>${item.row[2] ? `<span>Time ${item.row[2]}</span>` : ""}<span>HAMD ${item.total} 分</span></div><div class="record-controls"><button class="record-pdf" type="button" data-pdf-index="${index}" aria-label="輸出第 ${index + 1} 筆 HAMD 表單">輸出表單</button><button class="record-excel" type="button" data-excel-index="${index}" aria-label="輸出第 ${index + 1} 筆 HAMD Excel">輸出 Excel</button><button class="record-delete" type="button" data-delete-index="${index}" aria-label="刪除第 ${index + 1} 筆 HAMD 紀錄">刪除</button></div></div></li>`).join("")}</ol>`
     : `<p class="record-empty">尚未儲存填答。完成第一位後，按「儲存當前分數」。</p>`;
 }
 renderRecords();
@@ -429,33 +428,6 @@ document.querySelector("#hamd-record-list").addEventListener("click", async even
   } catch (error) {
     status.textContent = "無法輸出表單，請重新整理頁面後再試。";
     console.error("HAMD PDF export failed", error);
-  } finally {
-    button.disabled = false;
-  }
-});
-document.querySelector("#hamd-record-list").addEventListener("click", async event => {
-  const button = event.target.closest("[data-drive-index]");
-  if (!button || button.disabled) return;
-  const index = Number(button.dataset.driveIndex);
-  if (!Number.isInteger(index) || index < 0 || index >= records.length) return;
-  const item = records[index];
-  const row = item.row;
-  const date = String(row[0]).replaceAll("/", "-");
-  const id = String(row[1] ?? "").trim().replace(/[<>:"/\\|?*]/g, "_").slice(0, 50);
-  const visit = String(row[2] ?? "");
-  const suffix = `${id ? `_${id}` : ""}${/^[1-5]$/.test(visit) ? `_Time${visit}` : ""}`;
-  const status = document.querySelector("#hamd-record-status");
-  button.disabled = true;
-  status.textContent = "正在連接 Google 雲端…";
-  try {
-    await PsqiDrive.uploadFiles(async () => [
-      {blob: PsqiWorkbook.makeXlsx([{name: "HAMD", rows: [hamdHeaders, row]}]), name: `HAMD_${date}${suffix}.xlsx`},
-      {blob: new Blob([await HamdForm.makePdf(item)], {type: "application/pdf"}), name: `HAMD_表單_${date}${suffix}.pdf`}
-    ], (current, total) => { status.textContent = `正在上傳第 ${current}／${total} 個檔案…`; });
-    status.textContent = "此筆 HAMD 的 Excel 與 PDF 已上傳至指定的 Google 雲端資料夾。";
-  } catch (error) {
-    status.textContent = error.message;
-    console.error("HAMD Drive upload failed", error);
   } finally {
     button.disabled = false;
   }
@@ -571,41 +543,6 @@ document.querySelector("#combined-export-btn").addEventListener("click", async e
   } catch (error) {
     status.textContent = "無法匯出全部資料，請重新整理頁面後再試。";
     console.error("Combined export failed", error);
-  } finally {
-    button.disabled = false;
-  }
-});
-document.querySelector("#combined-drive-btn").addEventListener("click", async event => {
-  const intake = readIntakeRecords();
-  const psqiRows = readPsqiRows();
-  if (!intake.length && !psqiRows.length && !records.length) return;
-  const button = event.currentTarget;
-  const status = document.querySelector("#hamd-record-status");
-  button.disabled = true;
-  status.textContent = "正在連接 Google 雲端…";
-  try {
-    const uploaded = await PsqiDrive.uploadFiles(async () => {
-      status.textContent = "正在製作個人資料 PDF 與 PSQI／HAMD Excel…";
-      const files = [{
-        blob: PsqiWorkbook.makeXlsx([
-          {name: "PSQI", rows: [psqiHeaders, ...psqiRows], percentColumn: 33},
-          {name: "HAMD", rows: [hamdHeaders, ...records.map(item => item.row)]}
-        ]),
-        name: `PSQI_HAMD_全部紀錄_${localDate()}.xlsx`
-      }];
-      for (const [index, item] of intake.entries()) {
-        const bytes = await IntakeForm.makePdf(item);
-        const patient = String(item.patientId || item.fields.name || "未填編號").replace(/[<>:"/\\|?*]/g, "_").slice(0, 50);
-        const visit = item.visitNumber ? `_Time${item.visitNumber}` : "";
-        const number = String(index + 1).padStart(3, "0");
-        files.push({blob: new Blob([bytes], {type: "application/pdf"}), name: `個人資料表_${number}_${item.date}_${patient}${visit}.pdf`});
-      }
-      return files;
-    }, (current, total) => { status.textContent = `正在上傳第 ${current}／${total} 個檔案…`; });
-    status.textContent = `已上傳 ${uploaded.length} 個檔案至指定的 Google 雲端資料夾。`;
-  } catch (error) {
-    status.textContent = error.message;
-    console.error("Combined Drive upload failed", error);
   } finally {
     button.disabled = false;
   }
