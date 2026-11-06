@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="漢彌頓憂鬱量表的 21 項訪談評分、紀錄與 Excel 匯出。">
+  <title>HAMD 漢彌頓憂鬱量表</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="hamd.css">
+  <script src="xlsx.js" defer></script>
+  <script src="https://accounts.google.com/gsi/client" defer></script>
+  <script src="drive-config.js" defer></script>
+  <script src="drive-upload.js" defer></script>
+  <script src="vendor/pdf-lib.min.js" defer></script>
+  <script src="intake-form-template.js" defer></script>
+  <script src="intake-form.js" defer></script>
+  <script src="hamd-form-template.js" defer></script>
+  <script src="hamd-form.js" defer></script>
+  <script src="hamd.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <a class="back-link" href="Psqi.html">← 返回 PSQI 計算機</a>
+      <div class="eyebrow">HAMD · HAMILTON DEPRESSION RATING SCALE</div>
+      <h1>漢彌頓憂鬱量表</h1>
+      <div class="hero-stats"></span><span id="progress">已填 0 / 21 題</span></div>
+    </header>
+
+    <main class="hamd-layout">
+      <form id="hamd-form" class="card hamd-card">
+        <section class="hamd-identity">
+          <h2>日期與患者編號</h2>
+          <div class="identity-grid">
+            <label class="field">Date <input name="date" type="date" required></label>
+            <div class="field patient-field">
+              <label for="hamd-patient-id">患者編號（選填）</label>
+              <input id="hamd-patient-id" name="patientId" type="text" maxlength="100" aria-label="患者編號">
+              <div class="visit-picker" role="group" aria-label="填答次別，選填">
+                <span>填寫次數(選填)</span>
+                <button class="visit-button" id="hamd-visit-1" type="button" aria-label="第 1 次，前測" aria-pressed="false">1</button>
+                <button class="visit-button" id="hamd-visit-2" type="button" aria-label="第 2 次，實驗中" aria-pressed="false">2</button>
+                <button class="visit-button" id="hamd-visit-3" type="button" aria-label="第 3 次，後測" aria-pressed="false">3</button>
+                <button class="visit-button" id="hamd-visit-4" type="button" aria-label="第 4 次" aria-pressed="false">4</button>
+                <button class="visit-button" id="hamd-visit-5" type="button" aria-label="第 5 次" aria-pressed="false">5</button>
+              </div>
+              <input name="visitNumber" type="hidden" value="">
+            </div>
+          </div>
+        </section>
+        <div class="hamd-intro">
+          <h2>過去一週的情況</h2>
+          <p>請由評分者依訪談、觀察及附檔的評分說明，為每題選一個分數。第 16 題先選擇 A 或 B 評分方式；兩者只計其中一個。</p>
+        </div>
+        <div id="hamd-questions"></div>
+        <div class="hamd-actions">
+          <button class="button primary" type="submit">計算總分</button>
+          <button class="button secondary" type="reset" id="hamd-reset-btn">清除填答</button>
+          <button class="button secondary" type="button" id="hamd-save-btn">儲存當前分數</button>
+          <button class="button primary" type="button" id="hamd-export-btn" disabled>匯出 Excel</button>
+          <button class="button secondary saved-pdf-action" type="button" id="hamd-pdf-btn" disabled>輸出表單</button>
+        </div>
+        <p class="save-hint">每位填答後先按「儲存當前分數」；Excel 只包含已儲存紀錄。每筆紀錄可在下方個別輸出 PDF 表單。</p>
+        <p class="save-feedback" id="hamd-save-feedback" role="status" aria-live="polite"></p>
+      </form>
+
+      <aside class="card hamd-result" id="hamd-result" aria-live="polite" hidden>
+        <div class="result-heading"><span class="badge">計算結果</span><span>HAMD</span></div>
+        <div class="total"><strong id="hamd-total">—</strong><span>分</span></div>
+      </aside>
+    </main>
+
+    <section class="card records-card hamd-records" aria-labelledby="hamd-records-title">
+      <div class="records-head">
+        <div><h2 id="hamd-records-title">已儲存 HAMD 紀錄：<span id="hamd-record-count">0</span> 筆</h2><p>點擊藍色患者編號可回看與更新。右側按鈕會匯出個人資料 PDF，以及含 PSQI、HAMD 兩個工作表的 Excel。</p></div>
+        <div class="hamd-record-tools">
+          <button class="button combined-export" type="button" id="combined-export-btn">匯出當前紀錄壓縮檔</button>
+          <button class="button drive-action" type="button" id="combined-drive-btn">上傳全部至 Google 雲端</button>
+          <button class="button danger" type="button" id="hamd-clear-records-btn" disabled>清除全部紀錄</button>
+        </div>
+      </div>
+      <p id="hamd-record-status" class="record-status" role="status" aria-live="polite"></p>
+      <div id="hamd-record-list" class="record-list"></div>
+    </section>
+
+    <footer>中國醫藥大學北港附設醫院 穿戴式科技與高齡醫學實驗室</footer>
+  </div>
+</body>
+</html>
