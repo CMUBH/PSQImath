@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="填寫個人資料與生活習慣，儲存患者紀錄並下載已填寫的 PDF 表單。">
+  <title>個人資料表</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="intake.css">
+  <script src="xlsx.js" defer></script>
+  <script src="vendor/pdf-lib.min.js" defer></script>
+  <script src="intake-form-template.js" defer></script>
+  <script src="intake-form.js" defer></script>
+  <script src="intake.js" defer></script>
+  <script src="nas-upload.js" defer></script>
+</head>
+<body>
+  <div class="page">
+    <header class="hero intake-hero">
+      <div class="eyebrow">PATIENT INFORMATION</div>
+      <h1>個人資料表</h1>
+      <p>填寫個人資料、生活習慣與過去病史。儲存後可回看紀錄，並逐筆輸出 PDF 表單。</p>
+      <a class="hero-link" href="Psqi.html">前往 PSQI 睡眠品質量表 →</a>
+    </header>
+
+    <main class="intake-main">
+      <form id="intake-form" class="card intake-form" autocomplete="off">
+        <section class="section">
+          <div class="section-title"><span class="section-number">01</span><div><h2>個人資料表</h2><p>CMUBH.</p></div></div>
+          <div class="intake-grid">
+            <label class="field">Date <input name="date" type="date" required></label>
+            <label class="field">患者編號 <input name="patientId" type="text" maxlength="100" autocomplete="off" placeholder="例如：LLD123"></label>
+          </div>
+          <div class="intake-visit"><span>填寫次數（選填）</span><div class="visit-picker" role="group" aria-label="填寫次數，選填">
+            <button class="visit-button" type="button" data-visit="1" aria-pressed="false">1</button>
+            <button class="visit-button" type="button" data-visit="2" aria-pressed="false">2</button>
+            <button class="visit-button" type="button" data-visit="3" aria-pressed="false">3</button>
+            <button class="visit-button" type="button" data-visit="4" aria-pressed="false">4</button>
+            <button class="visit-button" type="button" data-visit="5" aria-pressed="false">5</button>
+          </div><input name="visitNumber" type="hidden" value=""></div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">02</span><div><h2>基本資料</h2></div></div>
+          <div class="intake-grid">
+            <label class="field">姓名 <input name="name" type="text" maxlength="80"></label>
+            <fieldset class="intake-choice-field"><legend>性別</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="gender" value="男"><span>男</span></label><label class="intake-choice"><input type="radio" name="gender" value="女"><span>女</span></label><label class="intake-choice"><input type="radio" name="gender" value="其他"><span>其他</span></label></div></fieldset>
+            <label class="field">出生年月日 <input name="birthDate" type="date"></label>
+            <fieldset class="intake-choice-field"><legend>婚姻狀態</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="marital" value="未婚"><span>未婚</span></label><label class="intake-choice"><input type="radio" name="marital" value="結婚"><span>結婚</span></label><label class="intake-choice"><input type="radio" name="marital" value="離婚"><span>離婚</span></label><label class="intake-choice"><input type="radio" name="marital" value="喪偶"><span>喪偶</span></label></div></fieldset>
+            <fieldset class="intake-choice-field"><legend>居住狀態</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="living" value="獨居"><span>獨居</span></label><label class="intake-choice"><input type="radio" name="living" value="與家人同住"><span>與家人同住</span></label></div></fieldset>
+            <label class="field">同住家人 <input name="livingWith" type="text" maxlength="100" placeholder="與家人同住時填寫"></label>
+            <label class="field">教育程度 <select name="education"><option value="">請選擇</option><option>未讀</option><option>幼稚園</option><option>國小</option><option>國中</option><option>高中</option><option>大學</option><option>碩士</option><option>博士</option></select></label>
+            <label class="field">職業／工作 <input name="occupation" type="text" maxlength="100"></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">03</span><div><h2>吸菸與飲酒</h2></div></div>
+          <div class="intake-grid">
+            <fieldset class="intake-choice-field"><legend>吸菸狀態</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="smoking" value="從未吸菸"><span>從未</span></label><label class="intake-choice"><input type="radio" name="smoking" value="已戒菸"><span>已戒菸</span></label><label class="intake-choice"><input type="radio" name="smoking" value="目前吸菸"><span>目前吸菸</span></label></div></fieldset>
+            <label class="field">戒菸約幾年 <input name="smokingQuitYears" type="number" min="0" step="0.1" inputmode="decimal"></label>
+            <label class="field">吸菸年數 <input name="smokingYears" type="number" min="0" step="0.1" inputmode="decimal"></label>
+            <fieldset class="intake-choice-field"><legend>飲酒狀態</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="drinking" value="從不飲酒"><span>從未</span></label><label class="intake-choice"><input type="radio" name="drinking" value="已戒酒"><span>已戒酒</span></label><label class="intake-choice"><input type="radio" name="drinking" value="目前飲酒"><span>目前飲酒</span></label></div></fieldset>
+            <label class="field">戒酒約幾年 <input name="drinkingQuitYears" type="number" min="0" step="0.1" inputmode="decimal"></label>
+            <label class="field">平均每週飲酒天數 <input name="drinkingDays" type="number" min="0" max="7" step="1" inputmode="numeric"></label>
+            <label class="field">每次飲酒量（杯） <input name="drinkingCups" type="number" min="0" step="0.1" inputmode="decimal"></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">04</span><div><h2>咖啡因攝取</h2><p>杯數以原表的約 240 mL／杯填寫；沒有攝取可留白。</p></div></div>
+          <fieldset class="intake-choice-field intake-short"><legend>是否攝取含咖啡因飲品</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="caffeine" value="否"><span>否</span></label><label class="intake-choice"><input type="radio" name="caffeine" value="是"><span>是</span></label></div></fieldset>
+          <div class="caffeine-table" role="group" aria-label="每日咖啡因攝取量">
+            <div class="caffeine-head"><span>飲品</span><span>早（起床～12:00）</span><span>午（12:00～18:00）</span><span>晚（18:00 後）</span></div>
+            <div class="caffeine-row"><span>咖啡</span><label><input name="coffeeMorning" type="number" min="0" step="0.1" inputmode="decimal" aria-label="早上咖啡杯數"></label><label><input name="coffeeAfternoon" type="number" min="0" step="0.1" inputmode="decimal" aria-label="下午咖啡杯數"></label><label><input name="coffeeEvening" type="number" min="0" step="0.1" inputmode="decimal" aria-label="晚上咖啡杯數"></label></div>
+            <div class="caffeine-row"><span>茶（杯／天）</span><label><input name="teaMorning" type="number" min="0" step="0.1" inputmode="decimal" aria-label="早上茶杯數"></label><label><input name="teaAfternoon" type="number" min="0" step="0.1" inputmode="decimal" aria-label="下午茶杯數"></label><label><input name="teaEvening" type="number" min="0" step="0.1" inputmode="decimal" aria-label="晚上茶杯數"></label></div>
+            <div class="caffeine-row"><span>含咖啡因飲品</span><label><input name="otherMorning" type="number" min="0" step="0.1" inputmode="decimal" aria-label="早上其他含咖啡因飲品杯數"></label><label><input name="otherAfternoon" type="number" min="0" step="0.1" inputmode="decimal" aria-label="下午其他含咖啡因飲品杯數"></label><label><input name="otherEvening" type="number" min="0" step="0.1" inputmode="decimal" aria-label="晚上其他含咖啡因飲品杯數"></label></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span class="section-number">05</span><div><h2>健康與過去病史</h2></div></div>
+          <div class="intake-grid">
+            <fieldset class="intake-choice-field"><legend>視力／聽力狀況</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="sensory" value="健康"><span>健康</span></label><label class="intake-choice"><input type="radio" name="sensory" value="受損"><span>受損</span></label></div></fieldset>
+            <fieldset class="intake-choice-field"><legend>行動狀態</legend><div class="intake-choice-group mobility-choice-group"><label class="intake-choice"><input type="radio" name="mobility" value="自由行動"><span>自由行動</span></label><label class="intake-choice"><input type="radio" name="mobility" value="需要協助"><span>需要協助</span></label><label class="intake-choice"><input type="radio" name="mobility" value="輪椅"><span>輪椅</span></label><label class="intake-choice"><input type="radio" name="mobility" value="臥床"><span>臥床</span></label></div></fieldset>
+            <fieldset class="intake-choice-field"><legend>過去是否因憂鬱症就醫</legend><div class="intake-choice-group"><label class="intake-choice"><input type="radio" name="depressionCare" value="否"><span>否</span></label><label class="intake-choice"><input type="radio" name="depressionCare" value="是"><span>是</span></label></div></fieldset>
+            <label class="field">這次憂鬱約持續幾週 <input name="depressionWeeks" type="number" min="0" step="0.1" inputmode="decimal"></label>
+          </div>
+          <label class="field intake-medications">用藥 <textarea name="medications" rows="5" maxlength="3000" placeholder="可輸入多種藥物，每種藥物分行"></textarea></label>
+        </section>
+
+        <div class="actions intake-actions">
+          <button class="button primary" type="button" id="intake-save-btn">儲存患者紀錄</button>
+          <button class="button secondary" type="button" id="intake-pdf-btn" disabled>輸出目前紀錄 PDF</button>
+          <button class="button secondary" type="button" id="intake-next-btn">前往 PSQI →</button>
+          <button class="button primary" type="button" id="nas-upload-btn" hidden>上傳至 NAS</button>
+          <button class="button subtle" type="button" id="intake-reset-btn">清除填答</button>
+        </div>
+        <p id="intake-feedback" class="save-feedback" role="status" aria-live="polite"></p>
+        <p id="nas-upload-status" class="record-status" role="status" aria-live="polite" hidden></p>
+      </form>
+
+      <section class="card records-card intake-records" aria-labelledby="intake-records-title">
+        <div class="records-head"><div><h2 id="intake-records-title">已儲存個人資料：<span id="intake-record-count">0</span> 筆</h2><p>點擊患者編號或姓名可回看、修改並更新原紀錄。紀錄保存在目前瀏覽器，其他裝置不會同步。</p></div><button class="button danger" type="button" id="intake-clear-btn" disabled>清除全部紀錄</button></div>
+        <p id="intake-record-status" class="record-status" role="status" aria-live="polite"></p>
+        <div id="intake-record-list" class="record-list"></div>
+      </section>
+    </main>
+    <footer>中國醫藥大學北港附設醫院 穿戴式科技與高齡醫學實驗室</footer>
+  </div>
+  <dialog id="nas-login-dialog" class="nas-login-dialog" aria-labelledby="nas-login-title">
+    <form method="dialog" id="nas-login-form">
+      <h2 id="nas-login-title">NAS 上傳密碼</h2>
+      <p>每次開啟網頁首次上傳時輸入。密碼透過 HTTPS 傳送至 NAS，關閉網頁後不保留。</p>
+      <label for="nas-password">上傳密碼</label>
+      <input id="nas-password" type="password" autocomplete="current-password" required>
+      <p id="nas-login-error" class="record-status" role="alert"></p>
+      <div class="nas-login-actions">
+        <button class="button secondary" type="button" id="nas-login-cancel">取消</button>
+        <button class="button primary" type="submit" id="nas-login-submit">登入並上傳</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
