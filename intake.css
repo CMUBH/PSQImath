@@ -1,7 +1,10 @@
 .intake-hero{display:flex;flex-direction:column;align-items:flex-start}
 .intake-hero p{max-width:720px;margin:0;color:#e2edf0;line-height:1.7}
-.scale-nav{display:flex;flex-direction:column;gap:8px;align-self:flex-end;width:min(330px,100%);margin-top:20px;color:#e2edf0;font-size:.86rem;font-weight:700}
-.scale-nav select{width:100%;height:48px;padding:0 42px 0 15px;border:1px solid #ffffff88;border-radius:10px;background:#fff;color:#203044;font-weight:650;cursor:pointer}
+.scale-nav{position:relative;display:flex;flex-direction:column;gap:8px;align-self:flex-end;width:min(330px,100%);margin-top:20px;color:#e2edf0;font-size:.86rem;font-weight:700}
+.scale-nav::after{content:"";position:absolute;right:19px;bottom:19px;width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);pointer-events:none}
+.scale-nav select{appearance:none;width:100%;height:48px;padding:0 42px 0 16px;border:1px solid #ffffff88;border-radius:10px;background:#ffffff24;color:#fff;font-size:1rem;font-weight:700;cursor:pointer}
+.scale-nav select:hover,.scale-nav select:focus-visible{background:#ffffff38}
+.scale-nav option{background:#fff;color:#203044}
 .intake-main{max-width:940px;margin:24px auto 0}
 .intake-form{padding:4px 30px 30px}
 .intake-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px}
